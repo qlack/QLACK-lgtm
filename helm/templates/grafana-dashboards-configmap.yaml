@@ -1,0 +1,19 @@
+{{- if .Values.grafana.enabled }}
+{{- $dashboardEnabled := dig "dashboards" "qlackOverview" "enabled" true .Values.grafana }}
+{{- if $dashboardEnabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qlack-lgtm-dashboards
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: qlack-lgtm-dashboards
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    grafana_dashboard: "1"
+data:
+  qlack-overview.json: |-
+{{ .Files.Get "files/dashboards/qlack-overview.json" | indent 4 }}
+{{- end }}
+{{- end }}
+

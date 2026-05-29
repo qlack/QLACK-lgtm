@@ -1,0 +1,2854 @@
+{
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus/Mimir",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "loki",
+      "name": "Loki",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "tempo",
+      "name": "Tempo",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Generated overview dashboard for the QLACK OTEL-LGTM stack: OpenTelemetry Collector, Loki, Mimir, Tempo, and Grafana. Includes expanded Tempo TraceQL drilldown panels for recent traces, slow/error traces, HTTP 5xx traces, downstream spans, DB/cache spans, exceptions, high-fanout spans, and downstream error traces.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 2,
+      "panels": [],
+      "title": "Application RED signals from Tempo metrics-generator",
+      "type": "row",
+      "description": "High-level application health signals derived from Tempo metrics-generator span metrics. This section summarizes request volume, error percentage, latency, trace span volume, service visibility, and log volume for the selected service and time range."
+    },
+    {
+      "datasource": {
+        "type": "grafana",
+        "uid": "-- Grafana --"
+      },
+      "description": "Explains the RED observability model used by this section.",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 1001,
+      "options": {
+        "content": "RED means **Rate**, **Errors**, and **Duration**. This section summarizes request-based service health using span metrics generated from Tempo traces. Rate shows request throughput, Errors shows failed request percentage or error volume, and Duration shows latency percentiles such as p95 and p99. These panels may show '**No data**' when no recent requests have produced spans in the selected time range.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.0.0",
+      "title": "About this section",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "reqps",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 7
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval]))",
+          "format": "time_series",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "Request rate"
+        }
+      ],
+      "title": "Request rate",
+      "type": "stat",
+      "description": "Current request throughput for the selected service, calculated from server-side span metrics. Use this to confirm whether the service is receiving traffic and to detect sudden traffic drops or spikes."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 7
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "100 * (sum(rate(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\", status_code=~\"STATUS_CODE_ERROR|ERROR|Error|error\"}[$__rate_interval]))) / clamp_min((sum(rate(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval]))), 0.000001)",
+          "format": "time_series",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "Error rate"
+        }
+      ],
+      "title": "Error rate",
+      "type": "stat",
+      "description": "Current percentage of server-side requests whose spans are marked as errors. A rising value usually indicates application failures, failed dependencies, or instrumentation marking requests as failed."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 7
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval])))",
+          "format": "time_series",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "p95 duration"
+        }
+      ],
+      "title": "p95 duration",
+      "type": "stat",
+      "description": "Current 95th percentile request duration for the selected service. This means roughly 95% of observed server-side requests completed at or below this latency."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 7
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval])))",
+          "format": "time_series",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "p99 duration"
+        }
+      ],
+      "title": "p99 duration",
+      "type": "stat",
+      "description": "Current 99th percentile request duration for the selected service. This is useful for spotting tail-latency issues affecting a smaller but important portion of users."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 11
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$service\"}[$__range]))",
+          "format": "time_series",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "Trace spans in range"
+        }
+      ],
+      "title": "Trace spans in range",
+      "type": "stat",
+      "description": "Total number of trace spans recorded for the selected service during the dashboard time range. Use this as a quick check that trace telemetry is arriving."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "count(count by (service) (traces_spanmetrics_calls_total{service=~\"$service\"}))",
+          "format": "time_series",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "Services reporting traces"
+        }
+      ],
+      "title": "Services reporting traces",
+      "type": "stat",
+      "description": "Number of services currently visible in the trace span metrics after applying the Service filter. If this is lower than expected, telemetry may be missing or the selected time range may be too narrow."
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "ef2aue8atucjkb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 11
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "ef2aue8atucjkb"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "sum(count_over_time({service_name=~\"$log_service\", k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"} |~ \"(?i)(error|exception|panic|fatal|failed)\" [$__range]))",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Error logs in range",
+      "type": "stat",
+      "description": "Total number of log entries in the selected time range that match common error keywords such as error, exception, panic, fatal, or failed. This is a keyword-based signal and may include false positives or miss errors logged with different wording."
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "ef2aue8atucjkb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 11
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "ef2aue8atucjkb"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "sum(count_over_time({service_name=~\"$log_service\", k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}[$__range]))",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Total logs in range",
+      "type": "stat",
+      "description": "Total number of Loki log entries matching the selected log service, namespace, and pod filters during the dashboard time range. Use this to confirm that logs are being ingested."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 11,
+      "panels": [],
+      "title": "Service performance",
+      "type": "row",
+      "description": "Service-level trends derived from Tempo span metrics. This section helps compare request rate, error rate, latency, slow operations, and erroring operations across services."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps",
+          "decimals": 2,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum by (service) (rate(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval]))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "title": "Request rate by service",
+      "type": "timeseries",
+      "description": "Request throughput over time grouped by service. Use this to compare traffic patterns between services and identify sudden increases, drops, or inactive services."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 2,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "100 * sum by (service) (rate(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\", status_code=~\"STATUS_CODE_ERROR|ERROR|Error|error\"}[$__rate_interval])) / clamp_min(sum by (service) (rate(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval])), 0.000001)",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "title": "Error rate % by service",
+      "type": "timeseries",
+      "description": "Error percentage over time grouped by service. Use this to identify which service is contributing the highest proportion of failed requests."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 3,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (service, le) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval])))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "title": "p95 duration by service",
+      "type": "timeseries",
+      "description": "95th percentile request duration over time grouped by service. Use this to identify services with sustained or intermittent latency degradation."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 15,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, histogram_quantile(0.95, sum by (service, span_name, le) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\"}[$__rate_interval]))))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "{{service}} {{span_name}}"
+        }
+      ],
+      "title": "Top slow operations p95",
+      "transformations": [],
+      "type": "table",
+      "description": "Top operations ranked by their 95th percentile duration. This helps identify the specific span names or endpoints that are slow rather than only showing which service is slow."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 16,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, sum by (service, span_name, status_code) (increase(traces_spanmetrics_calls_total{service=~\"$service\", span_kind=~\"SPAN_KIND_SERVER|SERVER|server\", status_code=~\"STATUS_CODE_ERROR|ERROR|Error|error\"}[$__range])))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "{{service}} {{span_name}} {{status_code}}"
+        }
+      ],
+      "title": "Top erroring operations",
+      "transformations": [],
+      "type": "table",
+      "description": "Operations with the highest number of error spans in the selected time range. Use this to focus investigation on the endpoints or span names producing the most failures."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 17,
+      "panels": [],
+      "title": "Service dependencies from Tempo service graph metrics",
+      "type": "row",
+      "description": "Dependency-level metrics derived from Tempo service graph metrics. This section shows traffic, failures, latency, and active edges between client and server services."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps",
+          "decimals": 2,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum by (client, server) (rate(traces_service_graph_request_total{client=~\"$service\"}[$__rate_interval]) or rate(traces_service_graph_request_total{server=~\"$service\"}[$__rate_interval]))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{client}} -> {{server}}"
+        }
+      ],
+      "title": "Request rate by client/server edge",
+      "type": "timeseries",
+      "description": "Request throughput over time for service-to-service edges. Each series represents communication from a client service to a server service."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps",
+          "decimals": 2,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum by (client, server) (rate(traces_service_graph_request_failed_total{client=~\"$service\"}[$__rate_interval]) or rate(traces_service_graph_request_failed_total{server=~\"$service\"}[$__rate_interval]))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{client}} -> {{server}}"
+        }
+      ],
+      "title": "Failed request rate by edge",
+      "type": "timeseries",
+      "description": "Failed request throughput over time for service-to-service edges. Use this to identify failing downstream dependencies or problematic service interactions."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 3,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (client, server, le) (rate(traces_service_graph_request_server_seconds_bucket{client=~\"$service\"}[$__rate_interval]) or rate(traces_service_graph_request_server_seconds_bucket{server=~\"$service\"}[$__rate_interval])))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{client}} -> {{server}}"
+        }
+      ],
+      "title": "p95 server duration by edge",
+      "type": "timeseries",
+      "description": "95th percentile server-side duration for each client/server dependency edge. This helps identify which downstream relationship is contributing latency."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 21,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "topk(50, sum by (client, server) (increase(traces_service_graph_request_total{client=~\"$service\"}[$__range]) or increase(traces_service_graph_request_total{server=~\"$service\"}[$__range])))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "legendFormat": "{{client}} -> {{server}}"
+        }
+      ],
+      "title": "Active service edges in selected range",
+      "transformations": [],
+      "type": "table",
+      "description": "Most active client/server service relationships during the selected time range. Use this to understand which services are communicating and how much traffic flows across each edge."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "id": 22,
+      "panels": [],
+      "title": "Logs from Loki",
+      "type": "row",
+      "description": "Log volume and recent error log views from Loki. This section helps verify log ingestion and inspect application errors matching the current filters."
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "ef2aue8atucjkb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "logs",
+          "decimals": 0,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "ef2aue8atucjkb"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "sum by (service_name) (count_over_time({service_name=~\"$log_service\", k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}[$__interval]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Log volume by service",
+      "type": "timeseries",
+      "description": "Log volume over time grouped by service name. Use this to detect logging spikes, missing logs, or services that are unexpectedly noisy."
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "ef2aue8atucjkb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "logs",
+          "decimals": 0,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "id": 24,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "ef2aue8atucjkb"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "sum by (service_name) (count_over_time({service_name=~\"$log_service\", k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"} |~ \"(?i)(error|exception|panic|fatal|failed)\" [$__interval]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Error logs by service",
+      "type": "timeseries",
+      "description": "Error-like log volume over time grouped by service name, based on keyword matching. Use this to identify services that are producing increasing numbers of error messages."
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "ef2aue8atucjkb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 25,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "ef2aue8atucjkb"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=~\"$log_service\", k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"} |~ \"(?i)(error|exception|panic|fatal|failed)\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent application errors",
+      "type": "logs",
+      "description": "Recent log lines matching common error keywords for the selected log service, namespace, and pod filters. Use this panel to inspect the actual error messages behind the error log counters."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 127
+      },
+      "id": 26,
+      "panels": [],
+      "title": "Kubernetes and OTEL-LGTM stack runtime",
+      "type": "row",
+      "description": "Kubernetes runtime context for pod and node resource usage. This section is mainly useful for platform operators; application users may treat it as supporting infrastructure context."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "cores",
+          "decimals": 3,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 128
+      },
+      "id": 31,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_cpu_usage{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"})) or topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_cpu_utilization{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{k8s_namespace_name}}/{{k8s_pod_name}}"
+        }
+      ],
+      "title": "Top pod CPU usage",
+      "type": "timeseries",
+      "description": "Top pods by CPU usage based on available Kubernetes pod CPU metrics. This can help spot workloads consuming CPU, but it depends on pod-level Kubernetes metrics being available in Prometheus/Mimir."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes",
+          "decimals": 1,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 128
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_memory_working_set{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"})) or topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_memory_usage{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}))",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{k8s_namespace_name}}/{{k8s_pod_name}}"
+        }
+      ],
+      "title": "Top pod memory working set",
+      "type": "timeseries",
+      "description": "Top pods by memory usage or working set based on available Kubernetes pod memory metrics. This can help spot memory-heavy workloads, but it depends on pod-level Kubernetes metrics being available in Prometheus/Mimir."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "cores",
+          "decimals": 2,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 136
+      },
+      "id": 33,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum by (k8s_node_name) (k8s_node_cpu_usage) or sum by (k8s_node_name) (k8s_node_cpu_utilization)",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{k8s_node_name}}"
+        }
+      ],
+      "title": "Node CPU usage",
+      "type": "timeseries",
+      "description": "CPU usage over time grouped by Kubernetes node. This shows node-level infrastructure usage, not application request CPU or OTEL-LGTM-specific usage."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "df2audk1iccg0e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes",
+          "decimals": 1,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 136
+      },
+      "id": 34,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "df2audk1iccg0e"
+          },
+          "editorMode": "code",
+          "expr": "sum by (k8s_node_name) (k8s_node_memory_working_set) or sum by (k8s_node_name) (k8s_node_memory_usage)",
+          "format": "time_series",
+          "instant": false,
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{k8s_node_name}}"
+        }
+      ],
+      "title": "Node memory usage",
+      "type": "timeseries",
+      "description": "Memory usage over time grouped by Kubernetes node. This shows node-level infrastructure usage, not application request memory or OTEL-LGTM-specific usage."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 89
+      },
+      "id": 37,
+      "panels": [],
+      "title": "Trace drilldown in Tempo",
+      "type": "row",
+      "description": "Direct Tempo TraceQL search panels for finding concrete traces to open and investigate. These panels are scoped by the Service dashboard variable where possible."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 90
+      },
+      "id": 38,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Recent traces for selected service",
+      "type": "table",
+      "description": "Recent traces containing spans from the selected service. Use this as the main trace landing panel when you want to open example traces without writing TraceQL manually."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 90
+      },
+      "id": 39,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && trace:duration > 1s }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Slow traces for selected service (> 1s)",
+      "type": "table",
+      "description": "Traces for the selected service whose total trace duration is greater than one second. Use this to find user journeys or requests with noticeable latency."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 90
+      },
+      "id": 42,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && span:status = error }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Error traces for selected service",
+      "type": "table",
+      "description": "Traces containing spans from the selected service that are marked with an error status. Use this to jump directly into failing requests."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 99
+      },
+      "id": 43,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && trace:duration > 1s && span:status = error }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Slow error traces",
+      "type": "table",
+      "description": "Traces for the selected service that are both slow and contain an error span. These are often high-priority traces because they combine latency and failure symptoms."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 99
+      },
+      "id": 44,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && span.http.response.status_code >= 500 } || { resource.service.name =~ \"${service:regex}\" && span.http.status_code >= 500 }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "HTTP 5xx traces",
+      "type": "table",
+      "description": "Traces for the selected service that contain HTTP server-side failure status codes. The query checks both newer and older OpenTelemetry HTTP status attributes to improve compatibility."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 99
+      },
+      "id": 45,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && span:kind = client && span:duration > 500ms }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "spans"
+        }
+      ],
+      "title": "Slow downstream/client spans (> 500ms)",
+      "type": "table",
+      "description": "Client spans from the selected service that took longer than 500 ms. These often point to slow downstream services, external APIs, databases, message brokers, or queues."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 108
+      },
+      "id": 46,
+      "panels": [],
+      "title": "Trace root-cause hints",
+      "type": "row",
+      "description": "TraceQL panels intended to highlight common root-cause patterns such as slow datastore calls, exceptions, large traces, and downstream failures. Use these after identifying that a service is slow or failing."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 109
+      },
+      "id": 47,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && span.db.system != nil && span:duration > 200ms } || { resource.service.name =~ \"${service:regex}\" && span.db.system.name != nil && span:duration > 200ms }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "spans"
+        }
+      ],
+      "title": "Slow database/cache spans (> 200ms)",
+      "type": "table",
+      "description": "Database or cache spans from the selected service that took longer than 200 ms. This panel depends on DB/cache semantic-convention attributes being present in the traces."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 109
+      },
+      "id": 48,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" && event.exception.message != nil }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Exception traces",
+      "type": "table",
+      "description": "Traces containing exception events attached to spans from the selected service. Use this to find runtime exceptions even when the span status was not explicitly marked as error."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 109
+      },
+      "id": 49,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ trace:rootService =~ \"${service:regex}\" && trace:duration > 1s }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Slow root-service traces (> 1s)",
+      "type": "table",
+      "description": "Slow traces where the selected service is the root service of the trace. This helps focus on requests that appear to originate from the selected service rather than downstream-only involvement."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 118
+      },
+      "id": 50,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" } | count() > 30",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Large traces by span count",
+      "type": "table",
+      "description": "Traces from the selected service with more than 30 spans. Large traces may indicate high fan-out, retries, loops, N+1-style behavior, or very chatty instrumentation."
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "af2auf35sokxsc"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 118
+      },
+      "id": 51,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "af2auf35sokxsc"
+          },
+          "filters": [],
+          "limit": 20,
+          "query": "{ resource.service.name =~ \"${service:regex}\" } >> { span:status = error }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Downstream error traces",
+      "type": "table",
+      "description": "Traces where the selected service is followed by an erroring descendant span. Use this to identify failures that happen after the selected service calls downstream components."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 143
+      },
+      "id": 40,
+      "panels": [],
+      "title": "Operational notes",
+      "type": "row",
+      "description": "Guidance for interpreting empty panels and validating telemetry ingestion. This section explains common causes of missing metrics, logs, or traces."
+    },
+    {
+      "datasource": {
+        "type": "grafana",
+        "uid": "-- Grafana --"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 144
+      },
+      "id": 41,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "## If a panel shows no data\n\n1. Confirm that applications are sending OTLP telemetry to `otel-collector` on port `4317` or `4318`.\n2. For trace RED panels, make sure spans are arriving in Tempo and the Tempo metrics-generator is writing `traces_spanmetrics_*` and `traces_service_graph_*` metrics to Mimir.\n3. The expanded Tempo trace panels are scoped by the `Service` dashboard variable and expect traces to contain `resource.service.name`. If a trace panel is empty, try `Service = All`, widen the dashboard time range, then inspect one trace in Tempo Explore to confirm the actual attribute names.\n4. The HTTP 5xx panel checks both `span.http.response.status_code` and the older `span.http.status_code`. The DB panel checks both `span.db.system` and `span.db.system.name`.\n5. For log panels, remember that the supplied values disable container log scraping. These panels expect logs sent via OTLP to Loki and labeled with `service_name`.\n6. For Kubernetes resource panels, the dashboard expects OpenTelemetry Kubernetes metric names normalized for Prometheus, for example `k8s_pod_cpu_usage`, `k8s_pod_memory_working_set`, and related node metrics. Some panels include fallbacks for the older CPU utilization names.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.0.0",
+      "title": "Troubleshooting notes",
+      "type": "text",
+      "description": "Operational checklist for panels that show no data. It explains which telemetry paths and labels the dashboard expects for traces, logs, and Kubernetes metrics."
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "qlack",
+    "otel",
+    "lgtm",
+    "loki",
+    "mimir",
+    "tempo",
+    "opentelemetry",
+    "traceql",
+    "traces"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".*"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "df2audk1iccg0e"
+        },
+        "definition": "label_values(traces_spanmetrics_calls_total, service)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": {
+          "query": "label_values(traces_spanmetrics_calls_total, service)",
+          "refId": "service-variable-query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".*"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "df2audk1iccg0e"
+        },
+        "definition": "label_values(k8s_namespace_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Namespace",
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "query": "label_values(k8s_namespace_name)",
+          "refId": "namespace-variable-query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".*"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "df2audk1iccg0e"
+        },
+        "definition": "label_values(k8s_pod_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pod",
+        "multi": true,
+        "name": "pod",
+        "options": [],
+        "query": {
+          "query": "label_values(k8s_pod_name)",
+          "refId": "pod-variable-query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".+"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "ef2aue8atucjkb"
+        },
+        "definition": "label_values(service_name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Log Service",
+        "multi": true,
+        "name": "log_service",
+        "options": [],
+        "query": "label_values(service_name)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "QLACK OTEL-LGTM Observability Overview",
+  "uid": "qlack-otel-lgtm-overview",
+  "version": 6,
+  "weekStart": ""
+}
