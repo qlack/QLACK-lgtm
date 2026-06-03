@@ -8,7 +8,8 @@
 global:
   # Kubernetes secrets used to authenticate with private container registries
   # Leave empty unless your environment requires private registry credentials.
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: regcred
 ################################################
 # OpenTelemetry Collector Configuration
 ################################################
@@ -200,7 +201,8 @@ loki:
     clusterDomain: "cluster.local"
   # Image pull secrets for accessing private container registries
   # Leave empty unless your environment requires private registry credentials.
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: regcred
   # Deployment mode: Monolithic Loki is deployed as a single binary, useful for small installs typically without HA, up to a few tens of GB/day.
   deploymentMode: Monolithic
   # Loki server configuration
@@ -333,7 +335,7 @@ mimir:
   global:
     # -- Definitions to set up nginx resolver
     # DNS service name for resolving internal Kubernetes services
-    dnsService: kube-dns
+    dnsService: rke2-coredns-rke2-coredns
     # Namespace where the DNS service is located
     dnsNamespace: kube-system
     # Kubernetes cluster domain suffix
@@ -342,7 +344,8 @@ mimir:
   image:
     # Image pull secrets for accessing private container registries
     # Leave empty unless your environment requires private registry credentials.
-    pullSecrets: []
+    pullSecrets:
+      - regcred
   # Mimir server configuration
   mimir:
     # Structured configuration using YAML (alternative to config file)
@@ -798,16 +801,18 @@ grafana:
   # Ingress configuration for external access to Grafana
   ingress:
     # Disabled by default for public/generic installs. Enable and set your own host/TLS values if needed.
-    enabled: false
+    enabled: true
     # Ingress controller class (nginx in this case)
     ingressClassName: nginx
     # Additional annotations for the ingress resource
     annotations: { }
     # Hostnames that route to Grafana
     hosts:
-      - grafana.example.com
+      - qlack-lgtm.test.eurodyn.com
     # TLS/SSL configuration for HTTPS
-    tls: []
+    tls:
+      - hosts:
+          - qlack-lgtm.test.eurodyn.com
   # Administrator credentials are read from an existing Kubernetes Secret.
   # Create the secret in the target namespace before deploying, for example:
   # kubectl -n lgtm create secret generic grafana-admin \
@@ -815,13 +820,13 @@ grafana:
   #   --from-literal=admin-password='<strong-password>'
   admin:
     # If true, this chart will create the Secret referenced by existingSecret.
-    create: false
+    create: true
     existingSecret: grafana-admin
     userKey: admin-user
     passwordKey: admin-password
     # Used only when create=true.
     username: admin
-    password: ""
+    password: "admin"
   # Resource requests and limits for Grafana pod
   resources:
     limits:

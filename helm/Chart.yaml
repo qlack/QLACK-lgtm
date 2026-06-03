@@ -10,7 +10,7 @@ maintainers:
 
 dependencies:
     - name: opentelemetry-collector
-      version: "0.143.0"
+      version: "0.158.0"
       repository: "https://open-telemetry.github.io/opentelemetry-helm-charts"
       alias: otelCollector
       condition: otelCollector.enabled
@@ -24,10 +24,10 @@ dependencies:
       alias: mimir
       condition: mimir.enabled
     - name: tempo
-      version: "1.24.4"
-      repository: "https://grafana.github.io/helm-charts"
+      version: "2.2.0"
+      repository: "oci://ghcr.io/grafana-community/helm-charts"
       condition: tempo.enabled
     - name: grafana
-      version: "10.5.8"
-      repository: "https://grafana.github.io/helm-charts"
+      version: "12.4.1"
+      repository: "oci://ghcr.io/grafana-community/helm-charts"
       condition: grafana.enabled
