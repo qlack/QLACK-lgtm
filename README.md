@@ -32,6 +32,36 @@ By default, the deployment works like this:
    - Grafana is pre-configured with **Loki**, **Prometheus/Mimir**, and **Tempo** datasources.
    - A built-in dashboard is provisioned from [`helm/files/dashboards/qlack-overview.json`](./helm/files/dashboards/qlack-overview.json).
 
+## Dashboard overview
+
+Grafana ships with a pre-provisioned **QLACK OTEL-LGTM Observability Overview** dashboard (set as the Grafana home page). It correlates metrics, logs, and traces from the LGTM stack in a single view. The screenshots below highlight its main sections.
+
+> Panels may show **No data** until applications start sending OTLP telemetry to the collector.
+
+### Application RED signals
+
+Rate, Errors, and Duration summary derived from Tempo metrics-generator span metrics, including request rate, error rate, p95/p99 latency, and trace/log counts for the selected range.
+
+![Application RED signals from Tempo metrics-generator](docs/images/1.png)
+
+### Service performance
+
+Per-service request rate, error rate, and p95 duration over time, plus tables of the slowest and most error-prone operations.
+
+![Service performance panels](docs/images/2.png)
+
+### Logs from Loki
+
+Log volume and error logs broken down by service, alongside a live view of recent application errors.
+
+![Logs from Loki panels](docs/images/3.png)
+
+### Trace drilldown in Tempo
+
+Tempo-backed trace tables for exploring recent, slow, error, and HTTP 5xx traces, with root-cause hint panels for deeper investigation.
+
+![Trace drilldown in Tempo panels](docs/images/4.png)
+
 ## Important default behavior
 
 Before deploying, note these defaults from [`helm/values.yaml`](./helm/values.yaml):
