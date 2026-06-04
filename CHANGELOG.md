@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project currently tracks chart-level release notes for the Helm chart in this repository.
 
+## [0.0.2] - 2026-06-04
+
+### Added
+- Added optional per-component StorageClass configuration for all persistent
+  volumes (Loki, Mimir ingester/store-gateway/compactor/ruler/alertmanager,
+  Tempo, and Grafana). Each persistence section exposes a commented-out
+  `storageClass`/`storageClassName` field that defaults to the cluster's default
+  StorageClass and can be set to override it when desired.
+
+### Documentation
+- Documented optional StorageClass configuration in `README.md`.
+
 ## [0.0.1] - 2026-06-03
 
 Initial release of the `qlack-lgtm` Helm chart, which installs the QLACK LGTM observability stack (OpenTelemetry Collector, Grafana Loki, Grafana Mimir, Grafana Tempo, and Grafana).

@@ -227,6 +227,46 @@ helm upgrade --install qlack-lgtm ./helm \
   -f values.override.yaml
 ```
 
+## Configuring the StorageClass
+
+By default every persistent volume (Loki, Mimir, Tempo and Grafana) is
+provisioned using each cluster's **default StorageClass**, so no configuration is
+required. If you want specific components to use a particular StorageClass, set
+the relevant field(s) — for example in a `values.override.yaml`:
+
+```yaml
+loki:
+  singleBinary:
+    persistence:
+      storageClass: fast-ssd
+mimir:
+  ingester:
+    persistentVolume:
+      storageClass: fast-ssd
+  store_gateway:
+    persistentVolume:
+      storageClass: fast-ssd
+  compactor:
+    persistentVolume:
+      storageClass: fast-ssd
+  ruler:
+    persistentVolume:
+      storageClass: fast-ssd
+  alertmanager:
+    persistentVolume:
+      storageClass: fast-ssd
+tempo:
+  persistence:
+    storageClassName: fast-ssd
+grafana:
+  persistence:
+    storageClassName: fast-ssd
+```
+
+You only need to set the components you care about; any field left unset keeps
+using the cluster's default StorageClass. The same fields are also present (as
+commented-out examples) in [`helm/values.yaml`](./helm/values.yaml).
+
 ## Key configuration defaults
 
 The full configuration lives in [`helm/values.yaml`](./helm/values.yaml). The table below highlights defaults that are especially important when deploying.

@@ -9,6 +9,11 @@ global:
   # Kubernetes secrets used to authenticate with private container registries
   # Leave empty unless your environment requires private registry credentials.
   imagePullSecrets: []
+  # StorageClass for persistent volumes.
+  # By default every component uses the cluster's default StorageClass.
+  # To pin all components to a specific StorageClass, uncomment the per-component
+  # "storageClass" / "storageClassName" fields in the persistence sections below
+  # and set them to the StorageClass name you want.
 ################################################
 # OpenTelemetry Collector Configuration
 ################################################
@@ -280,6 +285,9 @@ loki:
       accessModes:
         - ReadWriteOnce
       size: 10Gi
+      # If defined, storageClassName: <storageClass>
+      # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+      # storageClass: ""
   # Gateway provides load balancing and routing (disabled in SingleBinary mode)
   gateway:
     enabled: false
@@ -442,6 +450,9 @@ mimir:
     # Persistent storage for alertmanager state
     persistentVolume:
       enabled: true
+      # If defined, storageClassName: <storageClass>
+      # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+      # storageClass: ""
   # Distributor receives incoming metrics and forwards to ingesters
   distributor:
     # Number of distributor replicas (1 for simple setups)
@@ -468,6 +479,9 @@ mimir:
       enabled: true
       name: storage
       size: 10Gi
+      # If defined, storageClassName: <storageClass>
+      # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+      # storageClass: ""
     # Zone-aware replication for multi-zone HA (disabled for single zone)
     zoneAwareReplication:
       enabled: false
@@ -500,6 +514,9 @@ mimir:
       enabled: true
       name: storage
       size: 5Gi
+      # If defined, storageClassName: <storageClass>
+      # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+      # storageClass: ""
   # Querier executes PromQL queries against ingesters and store-gateways
   querier:
     enabled: true
@@ -546,6 +563,9 @@ mimir:
     persistentVolume:
       enabled: true
       size: 20Gi
+      # If defined, storageClassName: <storageClass>
+      # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+      # storageClass: ""
     # Zone-aware replication for multi-zone HA (disabled for single zone)
     zoneAwareReplication:
       enabled: false
@@ -564,6 +584,9 @@ mimir:
       enabled: true
       name: storage
       size: 20Gi
+      # If defined, storageClassName: <storageClass>
+      # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+      # storageClass: ""
   # Gateway (nginx) provides unified ingress for Mimir components
   gateway:
     nginx:
@@ -674,6 +697,9 @@ tempo:
       - ReadWriteOnce
     # Storage size for trace data
     size: 10Gi
+    # If defined, storageClassName: <storageClass>
+    # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+    # storageClassName: ""
 ##################################################
 # Grafana Configuration
 ##################################################
@@ -687,6 +713,8 @@ grafana:
     accessModes:
       - ReadWriteOnce
     size: 10Gi
+    # If defined, storageClassName: <storageClass>
+    # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
     # storageClassName: ""
   # ---------------------------------------------------------------------------
   # Dashboard provisioning
