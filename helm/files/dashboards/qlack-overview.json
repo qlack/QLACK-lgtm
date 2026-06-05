@@ -1486,7 +1486,7 @@
       "panels": [],
       "title": "Logs from Loki",
       "type": "row",
-      "description": "Log volume and recent error log views from Loki. This section helps verify log ingestion and inspect application errors matching the current filters."
+      "description": "Log volume, recent error log views, and the full log stream from Loki. This section helps verify log ingestion, inspect application errors, and review all log lines matching the current filters."
     },
     {
       "datasource": {
@@ -1695,7 +1695,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 63
+        "y": 73
       },
       "id": 25,
       "options": {
@@ -1726,6 +1726,49 @@
       "description": "Recent log lines matching common error keywords for the selected log service, namespace, and pod filters. Use this panel to inspect the actual error messages behind the error log counters."
     },
     {
+      "datasource": {
+        "type": "loki",
+        "uid": "ef2aue8atucjkb"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 27,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "ef2aue8atucjkb"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service_name=~\"$log_service\", k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent application logs (all)",
+      "type": "logs",
+      "description": "Recent log lines of all severities for the selected log service, namespace, and pod filters, with no error keyword filtering applied. Use this panel to inspect the full log stream and the context surrounding errors shown in the 'Recent application errors' panel."
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1735,9 +1778,9 @@
       },
       "id": 26,
       "panels": [],
-      "title": "Kubernetes and OTEL-LGTM stack runtime",
+      "title": "OTEL-LGTM pod usage and overall node usage",
       "type": "row",
-      "description": "Kubernetes runtime context for pod and node resource usage. This section is mainly useful for platform operators; application users may treat it as supporting infrastructure context."
+      "description": "Runtime resource context for the observability platform and the Kubernetes nodes hosting workloads. The pod panels are filtered to OTEL-LGTM-related components such as OpenTelemetry Collector, Grafana, Loki, Mimir, and Tempo. The node panels show overall Kubernetes node usage across all workloads, not only OTEL-LGTM."
     },
     {
       "datasource": {
@@ -1826,17 +1869,17 @@
             "uid": "df2audk1iccg0e"
           },
           "editorMode": "code",
-          "expr": "topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_cpu_usage{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"})) or topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_cpu_utilization{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}))",
+          "expr": "topk(15, sum by (instance) (\n  k8s_pod_cpu_usage{\n    instance=~\".*(otel|collector|grafana|loki|mimir|tempo).*\"\n  }\n))\nor\ntopk(15, sum by (instance) (\n  k8s_pod_cpu_utilization{\n    instance=~\".*(otel|collector|grafana|loki|mimir|tempo).*\"\n  }\n))",
           "format": "time_series",
           "instant": false,
           "range": true,
           "refId": "A",
-          "legendFormat": "{{k8s_namespace_name}}/{{k8s_pod_name}}"
+          "legendFormat": "{{instance}}"
         }
       ],
-      "title": "Top pod CPU usage",
+      "title": "OTEL-LGTM pod CPU usage",
       "type": "timeseries",
-      "description": "Top pods by CPU usage based on available Kubernetes pod CPU metrics. This can help spot workloads consuming CPU, but it depends on pod-level Kubernetes metrics being available in Prometheus/Mimir."
+      "description": "Shows CPU usage for OTEL-LGTM-related pods only, grouped by the instance label. The instance label is expected to include namespace, pod, and container-like information. This panel is filtered to components matching otel, collector, grafana, loki, mimir, or tempo."
     },
     {
       "datasource": {
@@ -1925,17 +1968,17 @@
             "uid": "df2audk1iccg0e"
           },
           "editorMode": "code",
-          "expr": "topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_memory_working_set{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"})) or topk(15, sum by (k8s_namespace_name, k8s_pod_name) (k8s_pod_memory_usage{k8s_namespace_name=~\"$namespace\", k8s_pod_name=~\"$pod\"}))",
+          "expr": "topk(15, sum by (instance) (\n  k8s_pod_memory_working_set{\n    instance=~\".*(otel|collector|grafana|loki|mimir|tempo).*\"\n  }\n))\nor\ntopk(15, sum by (instance) (\n  k8s_pod_memory_usage{\n    instance=~\".*(otel|collector|grafana|loki|mimir|tempo).*\"\n  }\n))",
           "format": "time_series",
           "instant": false,
           "range": true,
           "refId": "A",
-          "legendFormat": "{{k8s_namespace_name}}/{{k8s_pod_name}}"
+          "legendFormat": "{{instance}}"
         }
       ],
-      "title": "Top pod memory working set",
+      "title": "OTEL-LGTM pod memory usage",
       "type": "timeseries",
-      "description": "Top pods by memory usage or working set based on available Kubernetes pod memory metrics. This can help spot memory-heavy workloads, but it depends on pod-level Kubernetes metrics being available in Prometheus/Mimir."
+      "description": "Shows memory working set or memory usage for OTEL-LGTM-related pods only, grouped by the instance label. The instance label is expected to include namespace, pod, and container-like information. This panel is filtered to components matching otel, collector, grafana, loki, mimir, or tempo."
     },
     {
       "datasource": {
@@ -2032,9 +2075,9 @@
           "legendFormat": "{{k8s_node_name}}"
         }
       ],
-      "title": "Node CPU usage",
+      "title": "Overall node CPU usage",
       "type": "timeseries",
-      "description": "CPU usage over time grouped by Kubernetes node. This shows node-level infrastructure usage, not application request CPU or OTEL-LGTM-specific usage."
+      "description": "Shows total CPU usage per Kubernetes node across all workloads running on that node. This is cluster infrastructure context and is not specific to OTEL-LGTM."
     },
     {
       "datasource": {
@@ -2131,9 +2174,9 @@
           "legendFormat": "{{k8s_node_name}}"
         }
       ],
-      "title": "Node memory usage",
+      "title": "Overall node memory usage",
       "type": "timeseries",
-      "description": "Memory usage over time grouped by Kubernetes node. This shows node-level infrastructure usage, not application request memory or OTEL-LGTM-specific usage."
+      "description": "Shows total memory usage per Kubernetes node across all workloads running on that node. This is cluster infrastructure context and is not specific to OTEL-LGTM."
     },
     {
       "collapsed": false,
@@ -2849,6 +2892,6 @@
   "timezone": "browser",
   "title": "QLACK OTEL-LGTM Observability Overview",
   "uid": "qlack-otel-lgtm-overview",
-  "version": 6,
+  "version": 7,
   "weekStart": ""
 }
