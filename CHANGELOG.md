@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project currently tracks chart-level release notes for the Helm chart in this repository.
 
+## [0.0.3] - 2026-06-05
+
+### Added
+- Added a new "Recent application logs (all)" panel to the provisioned
+  `QLACK OTEL-LGTM Observability Overview` dashboard, showing the full Loki log
+  stream of all severities for the selected log service, namespace, and pod
+  filters to provide context around the errors surfaced in the existing
+  "Recent application errors" panel.
+
+### Changed
+- Refocused the dashboard's resource usage section (renamed to "OTEL-LGTM pod
+  usage and overall node usage"):
+  - The pod CPU and memory panels are now filtered to OTEL-LGTM-related
+    components (OpenTelemetry Collector, Grafana, Loki, Mimir, and Tempo) and
+    grouped by the `instance` label.
+  - The node CPU and memory panels are clarified as overall per-node usage
+    across all workloads, not OTEL-LGTM-specific.
+
 ## [0.0.2] - 2026-06-04
 
 ### Added
