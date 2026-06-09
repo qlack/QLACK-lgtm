@@ -2,8 +2,8 @@ apiVersion: v2
 name: qlack-lgtm
 description: A Helm chart that installs QLACK LGTM components including OpenTelemetry Collector, Grafana Loki, Grafana Mimir, Grafana Tempo, and Grafana for monitoring and visualization.
 type: application
-version: 0.0.1
-appVersion: "0.0.1"
+version: 0.0.4 # This is the version of the Helm chart itself. It should be incremented whenever there are changes to the chart, such as updates to dependencies or configuration.
+appVersion: "0.0.4" # This is the version of the application being deployed. It should be updated to reflect the version of QLACK LGTM that is being installed.
 maintainers:
   - name: European Dynamics SA
     url: https://www.eurodyn.com

@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project currently tracks chart-level release notes for the Helm chart in this repository.
 
+## [0.0.4] - 2026-06-09
+
+### Changed
+- Changed the default Grafana admin credential handling in `helm/values.yaml` to
+  ship with inline `adminUser: admin` / `adminPassword: admin` defaults for easy
+  first-time access, with `grafana.admin.existingSecret` now defaulting to `""`
+  so the inline credentials are used unless an existing Secret is supplied.
+- Disabled the OpenTelemetry Collector Kubernetes and node metrics presets by
+  default in `helm/values.yaml`, setting `hostMetrics`, `kubeletMetrics`, and
+  `clusterMetrics` to `enabled: false`, and documented how to re-enable each.
+
+### Documentation
+- Updated `README.md` to clarify the new default settings:
+  - Grafana admin credentials now default to `admin` / `admin`, with guidance to
+    supply a real Kubernetes Secret (Option A) or a chart-managed Secret
+    (Option B) for any non-throwaway deployment.
+  - OpenTelemetry Collector host, kubelet, and cluster metrics collection is
+    documented as disabled by default, with instructions on how to enable it.
+  - Reworked the login section into minimal-install and custom-Secret scenarios.
+  - Updated the configuration reference table to match the new defaults
+    (`hostMetrics`/`kubeletMetrics`/`clusterMetrics` off and an empty
+    `grafana.admin.existingSecret`).
+- Added a `Troubleshooting` section to `README.md` describing the Grafana
+  `initChownData` init container failure and how to work around it via
+  `grafana.initChownData.enabled: false`.
+
 ## [0.0.3] - 2026-06-05
 
 ### Added
