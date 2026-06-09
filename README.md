@@ -8,7 +8,7 @@ The chart itself lives in [`helm/`](./helm), and the chart name in [`helm/Chart.
 
 The chart installs and wires together the following components:
 
-- **OpenTelemetry Collector** (`otelCollector`) for ingesting telemetry from applications and Kubernetes nodes
+- **OpenTelemetry Collector** (`otelCollector`) for ingesting OTLP telemetry from applications, with optional Kubernetes and node metrics collection
 - **Grafana Loki** for log storage and querying
 - **Grafana Mimir** for Prometheus-compatible metrics storage
 - **Grafana Tempo** for distributed tracing
@@ -21,7 +21,7 @@ By default, the deployment works like this:
 1. **Collection**
    - The OpenTelemetry Collector runs as a **DaemonSet**.
    - It accepts **OTLP traces, metrics, and logs** from applications on ports `4317` and `4318`.
-   - It also collects **host**, **kubelet**, and **cluster** metrics.
+   - Host, kubelet, and cluster metrics collection is supported, but disabled by default.
 2. **Processing**
    - The collector applies batching and memory limiting.
 3. **Export**
@@ -69,15 +69,18 @@ Before deploying, note these defaults from [`helm/values.yaml`](./helm/values.ya
 - **Container log scraping is disabled by default**:
   - `otelCollector.presets.logsCollection.enabled: false`
   - This means application logs are expected to arrive via **OTLP**, unless you explicitly enable collector log scraping.
+- **Kubernetes and node metrics collection is disabled by default**:
+    - `otelCollector.presets.hostMetrics.enabled: false`
+    - `otelCollector.presets.kubeletMetrics.enabled: false`
+    - `otelCollector.presets.clusterMetrics.enabled: false`
+    - Enable these values if you want the collector to collect host, kubelet, and cluster-level Kubernetes metrics.
 - **Grafana Ingress is disabled by default**:
   - Enable it and set your own host/TLS values if you want external access through an ingress controller.
 - **Grafana persistence is enabled by default**:
   - Grafana data is stored on a PVC so password changes and other state survive pod recreation.
-- **Grafana admin credentials are read from an existing Kubernetes Secret**:
-  - Secret name: `grafana-admin`
-  - Username key: `admin-user`
-  - Password key: `admin-password`
-  - You can tell this chart to create that secret for you by setting `grafana.admin.create=true`.
+- **Grafana admin credentials default to `admin` / `admin`**:
+  - Out of the box the chart sets `adminUser: admin` and `adminPassword: admin` for easy first-time access.
+  - For real deployments either supply an existing Kubernetes Secret (Option A) or let this chart create one (Option B) — see the [Quick start](#quick-start-with-a-custom-values-file) section.
 - **Image pull secrets are empty by default**:
   - Set `global.imagePullSecrets`, `loki.imagePullSecrets`, `mimir.image.pullSecrets`, or `tempo.tempo.pullSecrets` only if your environment uses private registries.
 - Storage backends are configured for **filesystem/local persistence**, which is suitable for evaluation or simpler setups, but usually not enough for production-grade HA deployments.
@@ -88,9 +91,7 @@ Before deploying, note these defaults from [`helm/values.yaml`](./helm/values.ya
 - Helm `3.x`
 - A StorageClass / persistent volumes suitable for the stateful components
 - An Ingress controller if you keep `grafana.ingress.enabled=true`
-- Either:
-  - a Kubernetes Secret named `grafana-admin` in the target namespace with keys `admin-user` and `admin-password`, or
-  - Helm values that enable chart-managed secret creation for Grafana admin credentials
+- Grafana admin credentials — see the [Grafana admin credentials](#quick-start-with-a-custom-values-file) section below. The chart works out of the box with Grafana's built-in defaults (`admin` / `admin`), but you should supply real credentials for any non-throwaway deployment.
 
 ## The commands to deploy this chart
 
@@ -163,7 +164,8 @@ You generally do **not** need to run `helm repo add ...` just to install this re
 
 ## Quick start with a custom values file
 
-For most real deployments, create your own overrides file.
+By default, the chart sets `adminUser: admin` and `adminPassword: admin` for easy first-time access. 
+This is suitable for quick evaluation only. For any shared or long-lived deployment, configure your own Grafana admin credentials using one of the options below.
 
 ### Option A: use an existing Kubernetes Secret for Grafana admin credentials
 
@@ -277,9 +279,9 @@ The full configuration lives in [`helm/values.yaml`](./helm/values.yaml). The ta
 | `otelCollector.enabled` | `true` | Collector is enabled by default |
 | `otelCollector.mode` | `daemonset` | One collector pod per node |
 | `otelCollector.presets.logsCollection.enabled` | `false` | Pod stdout/stderr scraping is off by default |
-| `otelCollector.presets.hostMetrics.enabled` | `true` | Host metrics enabled |
-| `otelCollector.presets.kubeletMetrics.enabled` | `true` | Kubelet metrics enabled |
-| `otelCollector.presets.clusterMetrics.enabled` | `true` | Cluster metrics enabled |
+| `otelCollector.presets.hostMetrics.enabled` | `false` | Host metrics enabled |
+| `otelCollector.presets.kubeletMetrics.enabled` | `false` | Kubelet metrics enabled |
+| `otelCollector.presets.clusterMetrics.enabled` | `false` | Cluster metrics enabled |
 | `loki.enabled` | `true` | Loki enabled |
 | `loki.deploymentMode` | `Monolithic` | Single-binary style deployment |
 | `loki.loki.storage.type` | `filesystem` | Local filesystem storage |
@@ -293,7 +295,7 @@ The full configuration lives in [`helm/values.yaml`](./helm/values.yaml). The ta
 | `grafana.ingress.hosts[0]` | `grafana.example.com` | Example host used when ingress is enabled |
 | `grafana.persistence.enabled` | `true` | Grafana state is stored on a PVC |
 | `grafana.admin.create` | `false` | When true, this chart creates the Grafana admin secret |
-| `grafana.admin.existingSecret` | `grafana-admin` | Secret used for admin credentials |
+| `grafana.admin.existingSecret` | `""` | Leave empty to use `adminUser`/`adminPassword`; set to a Secret name to use your own |
 | `grafana.admin.userKey` | `admin-user` | Username key inside the secret |
 | `grafana.admin.passwordKey` | `admin-password` | Password key inside the secret |
 | `grafana.grafana.ini.dashboards.default_home_dashboard_path` | `/var/lib/grafana/dashboards/qlack/qlack-overview.json` | Built-in dashboard is the Grafana home page |
@@ -318,10 +320,25 @@ Then open:
 http://localhost:8080
 ```
 
-Default login:
+## Login
 
-- **User:** value of key `admin-user` from secret `grafana-admin`
-- **Password:** value of key `admin-password` from secret `grafana-admin`
+### Scenario 1: Minimal installation
+
+If you installed the chart without configuring a custom Grafana admin Secret, use the default credentials:
+
+- **User:** `admin`
+- **Password:** `admin`
+
+> ⚠️ On first login Grafana will prompt you to change the password. Use the new password for all subsequent logins.
+
+### Scenario 2: Custom Grafana admin Secret
+
+If you configured `grafana.admin.existingSecret`, use the credentials stored in that Secret.
+
+If you also set `grafana.admin.create: true`, this chart creates the Secret using:
+
+- `grafana.admin.username`
+- `grafana.admin.password`
 
 ## After login
 
@@ -345,6 +362,29 @@ In Grafana you can:
 - Because container log scraping is disabled by default, log panels will stay empty unless:
   - your applications send logs via OTLP, or
   - you change the collector configuration to enable Kubernetes/container log collection
+
+## Troubleshooting
+
+### Grafana `initChownData` init container failure
+
+When Grafana persistence is enabled, the upstream Grafana Helm chart may run an
+`init-chown-data` init container before starting Grafana. This init container tries to
+recursively change the ownership of `/var/lib/grafana` so that the main Grafana container
+can write to the persistent volume.
+
+On some storage backends, especially pre-provisioned volumes, NFS-backed volumes, or volumes
+with restrictive ownership settings, this ownership change may fail with errors such as
+`permission denied`, `operation not permitted`, or `read-only file system`.
+
+If the Grafana pod fails during the `init-chown-data` step and the volume is already writable
+by the Grafana container user, you can disable the init container:
+
+```yaml
+grafana:
+
+  initChownData:
+    enabled: false
+```
 
 ## Uninstall
 

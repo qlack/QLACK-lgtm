@@ -38,22 +38,25 @@ otelCollector:
     logsCollection:
       enabled: false
     # Configures the collector to collect host metrics.
+    # Default: false. Enable if you want node-level metrics like CPU, memory, disk, etc.
     hostMetrics:
-      enabled: true
+      enabled: false
     # Configures the Kubernetes Processor to add Kubernetes metadata.
     kubernetesAttributes:
       enabled: true
       extractAllPodLabels: true
       extractAllPodAnnotations: false
     # Configures the collector to collect node, pod, and container metrics from the API server on a kubelet.
+    # Default: false. Enable if you want Kubernetes metrics like pod CPU/memory usage, container restarts, etc.
     kubeletMetrics:
-      enabled: true
+      enabled: false
     # Configures the collector to collect kubernetes events.
     kubernetesEvents:
       enabled: false
     # Configures the Kubernetes Cluster Receiver to collect cluster-level metrics.
+    # Default: false. Enable if you want cluster-wide metrics like total CPU/memory capacity, node counts, etc.
     clusterMetrics:
-      enabled: true
+      enabled: false
   # OpenTelemetry Collector pipeline configuration
   config:
     # Exporters define where telemetry data is sent
@@ -836,15 +839,17 @@ grafana:
       - grafana.example.com
     # TLS/SSL configuration for HTTPS
     tls: []
-  # Administrator credentials are read from an existing Kubernetes Secret.
-  # Create the secret in the target namespace before deploying, for example:
-  # kubectl -n lgtm create secret generic grafana-admin \
-  #   --from-literal=admin-user=admin \
-  #   --from-literal=admin-password='<strong-password>'
+  # Administrator credentials when not using an existing secret (see README for production options).
+  adminUser: admin
+  adminPassword: "admin"
+  # Use an existing secret for the admin user.
   admin:
     # If true, this chart will create the Secret referenced by existingSecret.
     create: false
-    existingSecret: grafana-admin
+    # Name of an existing Secret that holds admin credentials.
+    # Leave empty ("") to use the adminUser / adminPassword values above.
+    # If create=true, you must set a name for the secret to be created, and provide the username/password values below.
+    existingSecret: ""
     userKey: admin-user
     passwordKey: admin-password
     # Used only when create=true.
